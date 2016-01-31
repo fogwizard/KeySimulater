@@ -98,9 +98,14 @@ namespace KeySimulater
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
 
-            Thread t1 = new Thread(new ThreadStart(ReadThread));
+            comm1.NewLine = "\r\n";
+
+            Thread t1 = new Thread(new ThreadStart(WriteThread));
+            Thread t2 = new Thread(new ThreadStart(ReadThread));
             t1.IsBackground = true;
+            t2.IsBackground = true;
             t1.Start();
+            t2.Start();
         }
 
         enum tag_receive_state
@@ -120,6 +125,43 @@ namespace KeySimulater
 
         tag_pack_type send_type = tag_pack_type.PACK_KEY;
         public void ReadThread()
+        {
+            while (true)
+            {
+                if (read_event.WaitOne(10))
+                {
+                    string str1 = String.Format("接收:[{0}] ", recv_count++);
+                    while (comm1.BytesToRead > 0)
+                    {
+                        comm1_new_receive_len = comm1.BytesToRead;
+                        //comm1.Read(rxbuf, 0, comm1.BytesToRead);
+                        string str2 = comm1.ReadLine() + "\r\n";
+                        /*for (int i = 0; i < comm1_new_receive_len; i++)
+                        {
+                            str1 = str1 + String.Format("{0:X2}", rxbuf[i]) + " ";
+                        }
+                        str2 = Encoding.ASCII.GetString(rxbuf);
+                        Array.Clear(rxbuf, 0, comm1_new_receive_len + 1);*/
+                        this.log1.BeginInvoke((Action)delegate
+                        {
+                            toolStripStatusLabel2.Text = str1;
+                            this.log1.Text += str2;
+                        });
+                    }
+                    DateTime currentTime = DateTime.Now;
+                    TimeSpan delta = currentTime - last_now;
+                    if (delta.TotalMilliseconds > 20)/* default 20ms */
+                    {/* we know this is two frame now */
+                        comm1_all_receive_len = 0;
+                    }
+
+                    comm1_all_receive_len += comm1_new_receive_len;
+                    last_now = currentTime;
+                    read_event.Reset();
+                }
+            }
+        }
+        public void WriteThread()
         {
             tag_receive_state s_state = tag_receive_state.STATE_START;
             while (true)
@@ -142,19 +184,6 @@ namespace KeySimulater
                             {
                                 s_state = tag_receive_state.STATE_SEND_BATERRY;
                             }
-                        }
-                        if (read_event.WaitOne(10))
-                        {
-                            DateTime currentTime = DateTime.Now;
-                            TimeSpan delta = currentTime - last_now;
-                            if (delta.TotalMilliseconds > 20)/* default 20ms */
-                            {/* we know this is two frame now */
-                                comm1_all_receive_len = 0;
-                            }
-
-                            comm1_all_receive_len += comm1_new_receive_len;
-                            last_now = currentTime;
-                            read_event.Reset();
                         }
                         break;
                     case tag_receive_state.STATE_SEND_KEY:
@@ -271,23 +300,6 @@ namespace KeySimulater
 
         private void comm1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            comm1_new_receive_len = comm1.BytesToRead;
-            comm1.Read(rxbuf, 0, comm1.BytesToRead);
-            //comm1.DiscardInBuffer();
-            string str1 = String.Format("接收:[{0}] ", recv_count++);
-            string str2 = "";
-            /*for (int i = 0; i < comm1_new_receive_len; i++)
-            {
-                str1 = str1 + String.Format("{0:X2}", rxbuf[i]) + " ";
-            }*/
-            str2 = Encoding.ASCII.GetString(rxbuf);
-            Array.Clear(rxbuf, 0, comm1_new_receive_len + 1);
-       //     builder.Append(str1);
-            this.log1.BeginInvoke((Action)delegate
-            {
-                toolStripStatusLabel2.Text = str1;
-                this.log1.Text += str2;
-            });
             read_event.Set();
         }
 
