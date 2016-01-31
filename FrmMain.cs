@@ -312,5 +312,14 @@ namespace KeySimulater
         {
             this.log1.Clear();
         }
+
+        private void start_avaid_repeat_Tick(object sender, EventArgs e)
+        {
+            if (!button_start.Enabled)
+            {
+                button_start.Enabled = true;
+            }
+            start_avaid_repeat.Enabled = false;
+        }
     }
 }

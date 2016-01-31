@@ -306,6 +306,11 @@
             this.button_up.UseVisualStyleBackColor = true;
             this.button_up.Click += new System.EventHandler(this.button_up_Click);
             // 
+            // start_avaid_repeat
+            // 
+            this.start_avaid_repeat.Interval = 500;
+            this.start_avaid_repeat.Tick += new System.EventHandler(this.start_avaid_repeat_Tick);
+            // 
             // saveFileDialog1
             // 
             this.saveFileDialog1.DefaultExt = "TXT";
