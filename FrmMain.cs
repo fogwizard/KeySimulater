@@ -222,7 +222,7 @@ namespace KeySimulater
         {
             txbuf[0] = 0xAA;
             txbuf[1] = 0x01;
-            txbuf[2] = 0x0d;
+            txbuf[2] = 0x54;
             comm1_send_len = 3;
             send_type = tag_pack_type.PACK_KEY;
             write_event.Set();
@@ -232,7 +232,7 @@ namespace KeySimulater
         {
             txbuf[0] = 0xAA;
             txbuf[1] = 0x02;
-            txbuf[2] = 0x0d;
+            txbuf[2] = 0x53;
             comm1_send_len = 3;
             send_type = tag_pack_type.PACK_KEY;
             write_event.Set();
@@ -242,7 +242,7 @@ namespace KeySimulater
         {
             txbuf[0] = 0xAA;
             txbuf[1] = 0x05;
-            txbuf[2] = 0x0d;
+            txbuf[2] = 0x50;
             comm1_send_len = 3;
             send_type = tag_pack_type.PACK_KEY;
             write_event.Set();
